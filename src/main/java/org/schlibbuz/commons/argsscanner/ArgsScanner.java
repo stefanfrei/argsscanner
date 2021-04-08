@@ -3,22 +3,28 @@
  */
 package org.schlibbuz.commons.argsscanner;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ArgsScanner {
 
     private static final Logger w = LogManager.getLogger(ArgsScanner.class);
+    private static final String AS_CONFIG_JSON = "src/main/resources/as.config.json";
 
     private final ArgsScannerConfig config;
+    private final Map<String, String> optionAliases;
     private final String originalArgsLine;
 
 
     public ArgsScanner(String[] args) {
         originalArgsLine = dumpArgs(args);
         w.trace(originalArgsLine);
-        config = ArgsScannerConfig.fromJSON("blaa");
-        w.trace(config.get("blaa"));
+        config = ArgsScannerConfig.fromJSON(AS_CONFIG_JSON);
+        optionAliases = config.loadOptionAliases();
     }
 
     String dumpArgs(String[] args) {
@@ -30,5 +36,51 @@ public class ArgsScanner {
             s.append(arg).append(" ");
         }
         return s.deleteCharAt(s.length()-1).toString();
+    }
+
+    LinkedList<String> normalizeArgs(String[] args) {
+        var argsList = new LinkedList<String>(Arrays.asList(args));
+
+        if (argsList.isEmpty()) {
+            return encapsulateWithDefaults(argsList);
+        }
+
+        if (argsList.size() == 1) {
+            if (isOption(argsList.get(0))) {
+                argsList = encapsulateWithDefaults(argsList);
+            } else {
+                argsList.addFirst(config.get("runmodes->default"));
+            }
+        }
+
+        return normalizeOptions(argsList);
+    }
+
+    LinkedList<String> normalizeOptions(LinkedList<String> argsList) {
+        for (int i = 0; i < argsList.size(); i++) {
+            String arg = argsList.get(i);
+            if (isOptionLong(arg)) {
+                argsList.set(i, optionAliases.get(arg));
+            }
+        }
+        return argsList;
+    }
+
+    LinkedList<String> encapsulateWithDefaults(LinkedList<String> argsList) {
+        argsList.addFirst(config.get("runmodes->default"));
+        argsList.addLast(config.get("target-default"));
+        return argsList;
+    }
+
+    boolean isOption(final String arg) {
+        return  !arg.isBlank()
+                &&
+                arg.startsWith("-");
+    }
+
+    boolean isOptionLong(final String arg) {
+        return  arg.length() > 1
+                &&
+                arg.startsWith("--");
     }
 }

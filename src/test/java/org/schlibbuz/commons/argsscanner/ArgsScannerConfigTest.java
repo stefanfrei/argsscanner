@@ -54,7 +54,9 @@ public class ArgsScannerConfigTest {
     )
     public static Object[][] get() {
         return new Object[][] {
-            {"stefan", "blaa -> stefan"},
+            {"stefan", null},
+            {"runmodes->default", "run"},
+            {"target-default", "index.html"},
         };
     }
     @Test(

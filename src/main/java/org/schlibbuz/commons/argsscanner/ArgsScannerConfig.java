@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
@@ -14,8 +15,14 @@ public class ArgsScannerConfig {
 
     private static final Logger w = LogManager.getLogger(ArgsScannerConfig.class);
 
+    private Map<String, String> config;
 
-    ArgsScannerConfig() {}
+
+    ArgsScannerConfig() {
+        config = new HashMap<String, String>();
+        config.put("runmodes->default", "run");
+        config.put("target-default", "index.html");
+    }
 
     public static ArgsScannerConfig fromJSON(final String file) {
         try {
@@ -42,8 +49,15 @@ public class ArgsScannerConfig {
         return new ArgsScannerConfig();
     }
 
+    HashMap<String, String> loadOptionAliases() {
+        var m = new HashMap<String, String>();
+        m.put("--jsoup-only", "-jo");
+        m.put("--selenium-only", "-so");
+        return m;
+    }
+
     public String get(String key) {
-        return "blaa -> " + key;
+        return config.get(key);
     }
 
     @Override
