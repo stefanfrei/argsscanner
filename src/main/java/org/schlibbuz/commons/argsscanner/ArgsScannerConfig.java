@@ -1,5 +1,6 @@
 package org.schlibbuz.commons.argsscanner;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -35,8 +36,8 @@ public class ArgsScannerConfig {
             // close reader
             reader.close();
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch(IOException e) {
+            w.error(e.getMessage());
         }
         return new ArgsScannerConfig();
     }
