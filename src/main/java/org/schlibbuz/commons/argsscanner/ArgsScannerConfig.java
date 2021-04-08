@@ -49,6 +49,13 @@ public class ArgsScannerConfig {
         return new ArgsScannerConfig();
     }
 
+    HashMap<String, String> loadOptionAliases() {
+        var m = new HashMap<String, String>();
+        m.put("--jsoup-only", "-jo");
+        m.put("--selenium-only", "-so");
+        return m;
+    }
+
     public String get(String key) {
         return config.get(key);
     }
