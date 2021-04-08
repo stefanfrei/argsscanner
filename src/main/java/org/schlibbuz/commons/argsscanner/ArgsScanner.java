@@ -5,6 +5,7 @@ package org.schlibbuz.commons.argsscanner;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,8 +15,11 @@ public class ArgsScanner {
 
     private static final Logger w = LogManager.getLogger(ArgsScanner.class);
     private static final String AS_CONFIG_JSON = "src/main/resources/as.config.json";
+    private static final String RUNMODE_DEFAULT = "runmodes->default";
+    private static final String TARGET_DEFAULT = "target-default";
 
     private final ArgsScannerConfig config;
+    private final Map<String, String> options;
     private final Map<String, String> optionAliases;
     private final String originalArgsLine;
 
@@ -24,6 +28,7 @@ public class ArgsScanner {
         originalArgsLine = dumpArgs(args);
         w.trace(originalArgsLine);
         config = ArgsScannerConfig.fromJSON(AS_CONFIG_JSON);
+        options = config.loadOptions();
         optionAliases = config.loadOptionAliases();
     }
 
@@ -38,8 +43,28 @@ public class ArgsScanner {
         return s.deleteCharAt(s.length()-1).toString();
     }
 
-    LinkedList<String> normalizeArgs(String[] args) {
-        var argsList = new LinkedList<String>(Arrays.asList(args));
+    List<ArgError> validateArgs(List<String> args) {
+
+        List<ArgError> errors = new LinkedList<>();
+
+        if (!isRunModeValid(args.get(0))) {
+            errors.add(
+                new ArgError(0, args.get(0), "this mode is not supported")
+            );
+        }
+
+        for (int i = 1; i < args.size()-1; i++) {
+            String arg = args.get(i);
+            if (isOption(arg) && !isOptionValid(arg)) {
+                new ArgError(0, args.get(i), "invalid option");
+            }
+        }
+
+        return errors;
+    }
+
+    List<String> normalizeArgs(String[] args) {
+        LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
 
         if (argsList.isEmpty()) {
             return encapsulateWithDefaults(argsList);
@@ -49,14 +74,14 @@ public class ArgsScanner {
             if (isOption(argsList.get(0))) {
                 argsList = encapsulateWithDefaults(argsList);
             } else {
-                argsList.addFirst(config.get("runmodes->default"));
+                argsList.addFirst(config.get(RUNMODE_DEFAULT));
             }
         }
 
         return normalizeOptions(argsList);
     }
 
-    LinkedList<String> normalizeOptions(LinkedList<String> argsList) {
+    List<String> normalizeOptions(LinkedList<String> argsList) {
         for (int i = 0; i < argsList.size(); i++) {
             String arg = argsList.get(i);
             if (isOptionLong(arg)) {
@@ -67,8 +92,8 @@ public class ArgsScanner {
     }
 
     LinkedList<String> encapsulateWithDefaults(LinkedList<String> argsList) {
-        argsList.addFirst(config.get("runmodes->default"));
-        argsList.addLast(config.get("target-default"));
+        argsList.addFirst(config.get(RUNMODE_DEFAULT));
+        argsList.addLast(config.get(TARGET_DEFAULT));
         return argsList;
     }
 
@@ -82,5 +107,18 @@ public class ArgsScanner {
         return  arg.length() > 1
                 &&
                 arg.startsWith("--");
+    }
+
+    boolean isOptionValid(final String option) {
+        return options.containsKey(option);
+    }
+
+    boolean isRunModeValid(String arg) {
+        var runModes = config.getRunModes();
+        for(var runMode : runModes) {
+            if (runMode.equalsIgnoreCase(arg))
+                return true;
+        }
+        return false;
     }
 }

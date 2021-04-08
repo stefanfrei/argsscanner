@@ -63,9 +63,9 @@ public class ArgsScannerTest {
         };
     }
     @Test(dataProvider = "isOption")
-    public void isOption(String option, boolean expected) {
+    public void isOption(String arg, boolean expected) {
         var inst = new ArgsScanner(new String[]{});
-        assertEquals(inst.isOption(option), expected);
+        assertEquals(inst.isOption(arg), expected);
     }
 
 
@@ -84,8 +84,29 @@ public class ArgsScannerTest {
         };
     }
     @Test(dataProvider = "isOptionLong")
-    public void isOptionLong(String option, boolean expected) {
+    public void isOptionLong(String arg, boolean expected) {
         var inst = new ArgsScanner(new String[]{});
-        assertEquals(inst.isOptionLong(option), expected);
+        assertEquals(inst.isOptionLong(arg), expected);
+    }
+
+
+    @DataProvider(name = "isRunModeValid")
+    public static Object[][] isRunModeValid() {
+        return new Object[][] {
+            {"brumm", false},
+            {"-jo", false},
+            {"--selenuim-only", false},
+            {"", false},
+            {"-jo", false},
+            {"run", true},
+            {"trace", true},
+            {"TRACE", true},
+            {"TrAcE", true},
+        };
+    }
+    @Test(dataProvider = "isRunModeValid")
+    public void isRunModeValid(String arg, boolean expected) {
+        var inst = new ArgsScanner(new String[]{});
+        assertEquals(inst.isRunModeValid(arg), expected);
     }
 }
