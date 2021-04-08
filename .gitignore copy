@@ -1,0 +1,30 @@
+# netbeans
+nbproject/
+nb-configuration.xml
+nbactions.xml
+
+#vscode
+.vscode/
+.settings/
+.classpath
+.factorypath
+.project
+
+# mvn
+target/
+release.properties
+
+#gradle
+.gradle/
+bin/
+build/
+gradle/
+gradlew*
+# project specific
+src/main/resources/app.props
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
