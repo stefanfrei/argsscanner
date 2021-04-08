@@ -3,12 +3,17 @@
  */
 package org.schlibbuz.commons.argsscanner;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ArgsScanner {
 
     private static final Logger w = LogManager.getLogger(ArgsScanner.class);
+    private static final String AS_CONFIG_JSON = "src/main/resources/as.config.json";
 
     private final ArgsScannerConfig config;
     private final String originalArgsLine;
@@ -17,8 +22,7 @@ public class ArgsScanner {
     public ArgsScanner(String[] args) {
         originalArgsLine = dumpArgs(args);
         w.trace(originalArgsLine);
-        config = ArgsScannerConfig.fromJSON("blaa");
-        w.trace(config.get("blaa"));
+        config = ArgsScannerConfig.fromJSON(AS_CONFIG_JSON);
     }
 
     String dumpArgs(String[] args) {
@@ -30,5 +34,17 @@ public class ArgsScanner {
             s.append(arg).append(" ");
         }
         return s.deleteCharAt(s.length()-1).toString();
+    }
+
+    List<String> normalizeArgs(String[] args) {
+        var argsList = new LinkedList<String>(Arrays.asList(args));
+
+        if (argsList.isEmpty()) {
+            argsList.add(config.get("runmodes->default"));
+            argsList.add(config.get("target-default"));
+            return argsList;
+        }
+
+        return argsList;
     }
 }
