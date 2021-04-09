@@ -16,27 +16,40 @@ public class ArgsScanner {
 
     private static final Logger w = LogManager.getLogger(ArgsScanner.class);
     private static final String AS_CONFIG_JSON = "src/main/resources/as.config.json";
-    private static final String RUNMODE_DEFAULT = "runmodes->default";
-    private static final String TARGET_DEFAULT = "target-default";
 
-    private final ArgsScannerConfig config;
+    /**
+     * 
+     */
+    private final ArgsConfig config;
     private final Map<String, Object> appSettings;
-    private final Map<String, String> options;
-    private final Map<String, String> optionAliases;
+    /**
+     * backup copy of commandline args
+     */
     private final String originalArgsLine;
 
-
+    /**
+     * El constructorino
+     * @param args - commandline arguments
+     */
     public ArgsScanner(String[] args) {
-        originalArgsLine = dumpArgs(args);
+        originalArgsLine = String.join(" ", args);
         w.trace(originalArgsLine);
-        config = ArgsScannerConfig.fromJSON(AS_CONFIG_JSON);
-        options = config.loadOptions();
-        optionAliases = config.loadOptionAliases();
+        config = ArgsConfig.fromJSON(AS_CONFIG_JSON);
         appSettings = buildAppSettings(args);
     }
 
+    /**
+     * prepare settings map for app to use
+     * @param args - commandline arguments
+     * @return settings map
+     */
     Map<String, Object> buildAppSettings(String[] args) {
-        var argsList = normalizeArgs(args);
+        var argsList = (LinkedList<String>)normalizeArgs(args);
+        var runMode = argsList.pollFirst();
+        var target = argsList.pollLast();
+        argsList = (LinkedList<String>)unifyOptionDuplicates(shortifyOptions(argsList));
+        argsList.addFirst(runMode);
+        argsList.addLast(target);
         var errors = validateArgs(argsList);
 
         if (!errors.isEmpty()) {
@@ -44,6 +57,10 @@ public class ArgsScanner {
             return null;
         }
 
+        return buildSettingsMap(argsList);
+    }
+
+    Map<String, Object> buildSettingsMap(LinkedList<String> argsList) {
         var m = new LinkedHashMap<String, Object>();
         m.put("runmode", argsList.peekFirst());
         for (int i = 1; i < argsList.size() - 1; i++) {
@@ -52,27 +69,25 @@ public class ArgsScanner {
         m.put("target", argsList.peekLast());
         return m;
     }
-
+    /**
+     * Getter for private var appSettings
+     * @return settings ready to use for app
+     */
     public Map<String, Object> getAppSettings() {
         return appSettings;
     }
 
-    String dumpArgs(String[] args) {
 
-        if (args.length == 0) return "";
-
-        var s = new StringBuilder();
-        for (var arg : args) {
-            s.append(arg).append(" ");
-        }
-        return s.deleteCharAt(s.length()-1).toString();
-    }
-
+    /**
+     * validity check
+     * @param args
+     * @return
+     */
     List<ArgError> validateArgs(List<String> args) {
 
         List<ArgError> errors = new LinkedList<>();
 
-        if (!isRunModeValid(args.get(0))) {
+        if (!config.isRunModeValid(args.get(0))) {
             errors.add(
                 new ArgError(0, args.get(0), "this mode is not supported")
             );
@@ -80,7 +95,7 @@ public class ArgsScanner {
 
         for (int i = 1; i < args.size()-1; i++) {
             String arg = args.get(i);
-            if (isOption(arg) && !isOptionValid(arg)) {
+            if (config.isOption(arg) && !config.isOptionValid(arg)) {
                 new ArgError(0, args.get(i), "invalid option");
             }
         }
@@ -88,7 +103,7 @@ public class ArgsScanner {
         return errors;
     }
 
-    LinkedList<String> normalizeArgs(String[] args) {
+    List<String> normalizeArgs(String[] args) {
         LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
 
         if (argsList.isEmpty()) {
@@ -97,56 +112,54 @@ public class ArgsScanner {
 
         if (argsList.size() == 1) {
             String arg0 = argsList.get(0);
-            if (isOption(arg0)) {
-                argsList = encapsulateWithDefaults(argsList);
-            } else if(isRunModeValid(arg0)) {
-                argsList.add(config.get(TARGET_DEFAULT));
+            if (config.isOption(arg0)) {
+                argsList = (LinkedList<String>)encapsulateWithDefaults(argsList);
+            } else if(config.isRunModeValid(arg0)) {
+                argsList.add(config.getTarget());
             } else {
-                argsList.addFirst(config.get(RUNMODE_DEFAULT));
+                argsList.addFirst(config.getRunMode());
             }
         }
 
         return normalizeOptions(argsList);
     }
 
-    LinkedList<String> normalizeOptions(LinkedList<String> argsList) {
-        for (int i = 0; i < argsList.size(); i++) {
-            String arg = argsList.get(i);
-            if (isOptionLong(arg)) {
-                argsList.set(i, optionAliases.get(arg));
+    LinkedList<String> normalizeOptions(LinkedList<String> optsList) {
+        for (int i = 0; i < optsList.size(); i++) {
+            String arg = optsList.get(i);
+            if (config.isOptionLong(arg)) {
+                optsList.set(i, config.getOptionShort(arg));
             }
         }
+        return optsList;
+    }
+
+    /**
+     * '--long-option' becomes '-lo'
+     * @param optsList
+     * @return
+     */
+    List<String> shortifyOptions(List<String> optsList) {
+        return optsList;
+    }
+
+    /**
+     * '-if pdf xml -if html' becomes '-if html pdf xml'
+     * @param optsList
+     * @return
+     */
+    List<String> unifyOptionDuplicates(List<String> optsList) {
+        return optsList;
+    }
+
+    /**
+     * '-jo' becomes 'run -jo index.html'
+     * @param argsList
+     * @return
+     */
+    List<String> encapsulateWithDefaults(LinkedList<String> argsList) {
+        argsList.addFirst(config.getRunMode());
+        argsList.addLast(config.getTarget());
         return argsList;
-    }
-
-    LinkedList<String> encapsulateWithDefaults(LinkedList<String> argsList) {
-        argsList.addFirst(config.get(RUNMODE_DEFAULT));
-        argsList.addLast(config.get(TARGET_DEFAULT));
-        return argsList;
-    }
-
-    boolean isOption(final String arg) {
-        return  !arg.isBlank()
-                &&
-                arg.startsWith("-");
-    }
-
-    boolean isOptionLong(final String arg) {
-        return  arg.length() > 1
-                &&
-                arg.startsWith("--");
-    }
-
-    boolean isOptionValid(final String option) {
-        return options.containsKey(option);
-    }
-
-    boolean isRunModeValid(String arg) {
-        var runModes = config.getRunModes();
-        for(var runMode : runModes) {
-            if (runMode.equalsIgnoreCase(arg))
-                return true;
-        }
-        return false;
     }
 }
