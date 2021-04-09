@@ -9,11 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.google.gson.Gson;
+import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class ArgsConfig {
+public final class ArgsConfig {
 
     private static final Logger w = LogManager.getLogger(ArgsConfig.class);
 
@@ -27,8 +28,8 @@ public class ArgsConfig {
 
     private final String runMode;
     private final String target;
-    private Map<String, String> optionDefinitions;
-    private Map<String, String> optionAliases;
+    private final Map<String, String> optionDefinitions;
+    private final Map<String, String> optionAliases;
 
 
     ArgsConfig() {
@@ -129,20 +130,31 @@ public class ArgsConfig {
     @Override
     public boolean equals(Object o) {
 
-        if (o == null)
+        if (this == o)
+            return true;
+
+        if (!(o instanceof ArgsConfig)) 
             return false;
 
-        if (o == this)
-            return true;
+        ArgsConfig other = (ArgsConfig) o;
 
-        if (o.getClass() == this.getClass())
-            return true;
-
-        return false;
+        return  Objects.equals(runMode, other.runMode)
+                &&
+                Objects.equals(target, other.target)
+                &&
+                Objects.equals(optionDefinitions, other.optionDefinitions)
+                &&
+                Objects.equals(optionAliases, other.optionAliases);
     }
 
     @Override
     public int hashCode() {
-        return System.identityHashCode(this);
+        int hash = 7;
+        hash = 17 * hash + Objects.hashCode(this.runMode);
+        hash = 17 * hash + Objects.hashCode(this.target);
+        hash = 17 * hash + Objects.hashCode(this.optionDefinitions);
+        hash = 17 * hash + Objects.hashCode(this.optionAliases);
+        return hash;
     }
+
 }

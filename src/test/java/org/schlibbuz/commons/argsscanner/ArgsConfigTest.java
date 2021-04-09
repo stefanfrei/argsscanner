@@ -4,6 +4,7 @@ import static org.testng.Assert.*;
 
 import java.lang.reflect.Method;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testng.annotations.AfterMethod;
@@ -18,6 +19,7 @@ public class ArgsConfigTest {
     private static final String AS_CONFIG_JSON = "src/main/resources/as.config.json";
 
     private ArgsConfig inst;
+
 
     @BeforeMethod
     public void pre(Method method) {
@@ -48,7 +50,6 @@ public class ArgsConfigTest {
         assertEquals(inst, expected);
     }
 
-
     @DataProvider(name = "isOption")
     public static Object[][] isOption() {
         return new Object[][] {
@@ -64,7 +65,6 @@ public class ArgsConfigTest {
     public void isOption(String arg, boolean expected) {
         assertEquals(inst.isOption(arg), expected);
     }
-
 
     @DataProvider(name = "isOptionLong")
     public static Object[][] isOptionLong() {
@@ -85,7 +85,6 @@ public class ArgsConfigTest {
         assertEquals(inst.isOptionLong(arg), expected);
     }
 
-
     @DataProvider(name = "isRunModeValid")
     public static Object[][] isRunModeValid() {
         return new Object[][] {
@@ -103,5 +102,10 @@ public class ArgsConfigTest {
     @Test(dataProvider = "isRunModeValid")
     public void isRunModeValid(String arg, boolean expected) {
         assertEquals(inst.isRunModeValid(arg), expected);
+    }
+
+    @Test
+    public void equalsContract() {
+        EqualsVerifier.forClass(ArgsConfig.class).verify();
     }
 }
