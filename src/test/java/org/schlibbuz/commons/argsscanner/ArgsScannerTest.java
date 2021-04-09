@@ -37,6 +37,7 @@ public class ArgsScannerTest {
         return new Object[][] {
             {new String[]{}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
             {new String[]{"-jo"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},
+            {new String[]{"run"}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
             {new String[]{"--jsoup-only"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},
             {new String[]{"run", "index.html"}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
             {new String[]{"run", "-jo", "index.html"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},

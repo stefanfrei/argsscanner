@@ -71,8 +71,11 @@ public class ArgsScanner {
         }
 
         if (argsList.size() == 1) {
-            if (isOption(argsList.get(0))) {
+            String arg0 = argsList.get(0);
+            if (isOption(arg0)) {
                 argsList = encapsulateWithDefaults(argsList);
+            } else if(isRunModeValid(arg0)) {
+                argsList.add(config.get(TARGET_DEFAULT));
             } else {
                 argsList.addFirst(config.get(RUNMODE_DEFAULT));
             }
