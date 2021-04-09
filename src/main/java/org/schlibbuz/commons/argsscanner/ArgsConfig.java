@@ -13,9 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-public class ArgsScannerConfig {
+public class ArgsConfig {
 
-    private static final Logger w = LogManager.getLogger(ArgsScannerConfig.class);
+    private static final Logger w = LogManager.getLogger(ArgsConfig.class);
 
     private static final String OPT_JO_SHORT = "-jo";
     private static final String OPT_JO_LONG = "--jsoup-only";
@@ -25,16 +25,20 @@ public class ArgsScannerConfig {
     private static final String RUNMODE_TRACE = "trace";
     private static final String TARGET_DEFAULT = "index.html";
 
-    private Map<String, String> config;
+    private final String runMode;
+    private final String target;
+    private Map<String, String> optionDefinitions;
+    private Map<String, String> optionAliases;
 
 
-    ArgsScannerConfig() {
-        config = new HashMap<>();
-        config.put("runmodes->default", RUNMODE_RUN);
-        config.put("target-default", TARGET_DEFAULT);
+    ArgsConfig() {
+        runMode = RUNMODE_RUN;
+        target = TARGET_DEFAULT;
+        optionDefinitions = loadOptionDefinitions();
+        optionAliases = loadOptionAliases();
     }
 
-    public static ArgsScannerConfig fromJSON(final String file) {
+    public static ArgsConfig fromJSON(final String file) {
         try {
             // create Gson instance
             Gson gson = new Gson();
@@ -56,10 +60,10 @@ public class ArgsScannerConfig {
         } catch(IOException e) {
             w.error(e.getMessage());
         }
-        return new ArgsScannerConfig();
+        return new ArgsConfig();
     }
 
-    Map<String, String> loadOptions() {
+    Map<String, String> loadOptionDefinitions() {
         var m = new HashMap<String, String>();
         m.put(OPT_JO_LONG, OPT_JO_SHORT);
         m.put(OPT_JO_SHORT, OPT_JO_SHORT);
@@ -82,8 +86,44 @@ public class ArgsScannerConfig {
         return l;
     }
 
-    public String get(String key) {
-        return config.get(key);
+    String getRunMode() {
+        return runMode;
+    }
+
+    String getTarget() {
+        return target;
+    }
+
+    String getOption(String key) {
+        return optionDefinitions.get(key);
+    }
+
+    String getOptionShort(String option) {
+        return optionAliases.get(option);
+    }
+
+    boolean isOption(final String arg) {
+        return  !arg.isBlank()
+                &&
+                arg.startsWith("-");
+    }
+
+    boolean isOptionLong(final String arg) {
+        return  arg.length() > 1
+                &&
+                arg.startsWith("--");
+    }
+
+    boolean isOptionValid(final String option) {
+        return optionDefinitions.containsKey(option);
+    }
+
+    boolean isRunModeValid(final String arg) {
+        for(var m : getRunModes()) {
+            if (m.equalsIgnoreCase(arg))
+                return true;
+        }
+        return false;
     }
 
     @Override
