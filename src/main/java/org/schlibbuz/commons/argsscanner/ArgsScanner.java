@@ -38,18 +38,19 @@ public class ArgsScanner {
     Map<String, Object> buildAppSettings(String[] args) {
         var argsList = normalizeArgs(args);
         var errors = validateArgs(argsList);
-        if (errors.isEmpty()) {
-            var m = new LinkedHashMap<String, Object>();
-            m.put("runmode", argsList.peekFirst());
-            for (int i = 1; i < argsList.size() - 1; i++) {
-                m.put(argsList.get(i), 1);
-            }
-            m.put("target", argsList.peekLast());
-            return m;
+
+        if (!errors.isEmpty()) {
+            errors.forEach(w::error);
+            return null;
         }
 
-        errors.forEach(w::error);
-        return null;
+        var m = new LinkedHashMap<String, Object>();
+        m.put("runmode", argsList.peekFirst());
+        for (int i = 1; i < argsList.size() - 1; i++) {
+            m.put(argsList.get(i), 1);
+        }
+        m.put("target", argsList.peekLast());
+        return m;
     }
 
     Map<String, Object> getAppSettings() {
