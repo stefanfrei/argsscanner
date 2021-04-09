@@ -4,6 +4,7 @@
 package org.schlibbuz.commons.argsscanner;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ArgsScanner {
 
         if (!errors.isEmpty()) {
             errors.forEach(w::error);
-            return null;
+            return Collections.emptyMap();
         }
 
         return buildSettingsMap(argsList);
