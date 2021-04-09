@@ -32,7 +32,7 @@ public class ArgsScanner {
      * @param args - commandline arguments
      */
     public ArgsScanner(String[] args) {
-        originalArgsLine = argsToString(args);
+        originalArgsLine = String.join(" ", args);
         w.trace(originalArgsLine);
         config = ArgsConfig.fromJSON(AS_CONFIG_JSON);
         appSettings = buildAppSettings(args);
@@ -77,21 +77,6 @@ public class ArgsScanner {
         return appSettings;
     }
 
-    /**
-     * toString for String[] args
-     * @param args - commandline arguments
-     * @return backup as string
-     */
-    String argsToString(String[] args) {
-
-        if (args.length == 0) return "";
-
-        var s = new StringBuilder();
-        for (var arg : args) {
-            s.append(arg).append(" ");
-        }
-        return s.deleteCharAt(s.length()-1).toString();
-    }
 
     /**
      * validity check

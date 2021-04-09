@@ -15,24 +15,6 @@ public class ArgsScannerTest {
 
 
     @DataProvider(
-        name = "argsToString"
-    )
-    public static Object[][] argsToString() {
-        return new Object[][] {
-            {new String[]{"a", "b", "c"}, "a b c"},
-            {new String[]{"run", "-jo", "index2.html"}, "run -jo index2.html"},
-        };
-    }
-    @Test(
-        dataProvider = "argsToString"
-    )
-    public void argsToString(String[] args, String expected) {
-        var inst = new ArgsScanner(args);
-        assertEquals(inst.argsToString(args), expected);
-    }
-
-
-    @DataProvider(
         name = "buildAppSettings"
     )
     public static Object[][] buildAppSettings() {
