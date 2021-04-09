@@ -4,6 +4,7 @@
 package org.schlibbuz.commons.argsscanner;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class ArgsScanner {
     private static final String TARGET_DEFAULT = "target-default";
 
     private final ArgsScannerConfig config;
+    private final Map<String, Object> appSettings;
     private final Map<String, String> options;
     private final Map<String, String> optionAliases;
     private final String originalArgsLine;
@@ -30,6 +32,28 @@ public class ArgsScanner {
         config = ArgsScannerConfig.fromJSON(AS_CONFIG_JSON);
         options = config.loadOptions();
         optionAliases = config.loadOptionAliases();
+        appSettings = buildAppSettings(args);
+    }
+
+    Map<String, Object> buildAppSettings(String[] args) {
+        var argsList = normalizeArgs(args);
+        var errors = validateArgs(argsList);
+        if (errors.isEmpty()) {
+            var m = new LinkedHashMap<String, Object>();
+            m.put("runmode", argsList.peekFirst());
+            for (int i = 1; i < argsList.size() - 1; i++) {
+                m.put(argsList.get(i), 1);
+            }
+            m.put("target", argsList.peekLast());
+            return m;
+        }
+
+        errors.forEach(w::error);
+        return null;
+    }
+
+    Map<String, Object> getAppSettings() {
+        return appSettings;
     }
 
     String dumpArgs(String[] args) {
@@ -63,7 +87,7 @@ public class ArgsScanner {
         return errors;
     }
 
-    List<String> normalizeArgs(String[] args) {
+    LinkedList<String> normalizeArgs(String[] args) {
         LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
 
         if (argsList.isEmpty()) {
@@ -84,7 +108,7 @@ public class ArgsScanner {
         return normalizeOptions(argsList);
     }
 
-    List<String> normalizeOptions(LinkedList<String> argsList) {
+    LinkedList<String> normalizeOptions(LinkedList<String> argsList) {
         for (int i = 0; i < argsList.size(); i++) {
             String arg = argsList.get(i);
             if (isOptionLong(arg)) {
