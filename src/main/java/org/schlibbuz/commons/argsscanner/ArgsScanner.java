@@ -53,7 +53,7 @@ public class ArgsScanner {
         return m;
     }
 
-    Map<String, Object> getAppSettings() {
+    public Map<String, Object> getAppSettings() {
         return appSettings;
     }
 
