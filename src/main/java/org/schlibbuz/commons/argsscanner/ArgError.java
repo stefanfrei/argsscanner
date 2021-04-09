@@ -25,4 +25,9 @@ public class ArgError {
     String getDescription() {
         return description;
     }
+
+    @Override
+    public String toString() {
+        return "ArgError{" + "index=" + index + ", source=" + source + ", description=" + description + '}';
+    }
 }
