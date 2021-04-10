@@ -18,33 +18,33 @@ public class ArgsScannerTest {
         name = "buildAppSettings"
     )
     public static Object[][] buildAppSettings() {
-        var args0 = new String[]{};
+        String[] args0 = {};
         var exp0 = new LinkedHashMap<String, Object>();
         exp0.put("runmode", "run");
         exp0.put("target", "index.html");
 
-        var args1 = new String[]{"run"};
+        String[] args1 = {"run"};
         var exp1 = new LinkedHashMap<String, Object>();
         exp1.put("runmode", "run");
         exp1.put("target", "index.html");
 
-        var args2 = new String[]{"default.html"};
+        String[] args2 = {"default.html"};
         var exp2 = new LinkedHashMap<String, Object>();
         exp2.put("runmode", "run");
         exp2.put("target", "default.html");
 
-        var args3 = new String[]{"--jsoup-only"};
+        String[] args3 = {"--jsoup-only"};
         var exp3 = new LinkedHashMap<String, Object>();
         exp3.put("runmode", "run");
         exp3.put("-jo", 1);
         exp3.put("target", "index.html");
 
-        var args4 = new String[]{"run", "www.google.ch"};
+        String[] args4 = {"run", "www.google.ch"};
         var exp4 = new LinkedHashMap<String, Object>();
         exp4.put("runmode", "run");
         exp4.put("target", "www.google.ch");
 
-        var args5 = new String[]{"trace", "--selenium-only", "wwwroot"};
+        String[] args5 = {"trace", "--selenium-only", "wwwroot"};
         var exp5 = new LinkedHashMap<String, Object>();
         exp5.put("runmode", "trace");
         exp5.put("-so", 1);
@@ -73,12 +73,12 @@ public class ArgsScannerTest {
     )
     public static Object[][] normalizeArgs() {
         return new Object[][] {
-            {new String[]{}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
-            {new String[]{"-jo"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},
-            {new String[]{"run"}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
-            {new String[]{"--jsoup-only"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},
-            {new String[]{"run", "index.html"}, new LinkedList<String>(Arrays.asList("run", "index.html"))},
-            {new String[]{"run", "-jo", "index.html"}, new LinkedList<String>(Arrays.asList("run", "-jo", "index.html"))},
+            {new String[]{}, new LinkedList<String>(List.of("run", "index.html"))},
+            {new String[]{"-jo"}, new LinkedList<String>(List.of("run", "-jo", "index.html"))},
+            {new String[]{"run"}, new LinkedList<String>(List.of("run", "index.html"))},
+            {new String[]{"--jsoup-only"}, new LinkedList<String>(List.of("run", "-jo", "index.html"))},
+            {new String[]{"run", "index.html"}, new LinkedList<String>(List.of("run", "index.html"))},
+            {new String[]{"run", "-jo", "index.html"}, new LinkedList<String>(List.of("run", "-jo", "index.html"))},
         };
     }
     @Test(
@@ -96,9 +96,9 @@ public class ArgsScannerTest {
     public static Object[][] normalizeOptions() {
         return new Object[][] {
             {new LinkedList<String>(), new LinkedList<String>()},
-            {new LinkedList<String>(Arrays.asList("-jo", "-jo", "--jsoup-only")), new LinkedList<String>(Arrays.asList("-jo", "-jo", "-jo"))},
-            {new LinkedList<String>(Arrays.asList("-jo", "--selenium-only", "-so")), new LinkedList<String>(Arrays.asList("-jo", "-so", "-so"))},
-            {new LinkedList<String>(Arrays.asList("-jo", "-if", "--selenium-only")), new LinkedList<String>(Arrays.asList("-jo", "-if", "-so"))},
+            {new LinkedList<String>(List.of("-jo", "-jo", "--jsoup-only")), new LinkedList<String>(List.of("-jo", "-jo", "-jo"))},
+            {new LinkedList<String>(List.of("-jo", "--selenium-only", "-so")), new LinkedList<String>(List.of("-jo", "-so", "-so"))},
+            {new LinkedList<String>(List.of("-jo", "-if", "--selenium-only")), new LinkedList<String>(List.of("-jo", "-if", "-so"))},
         };
     }
     @Test(

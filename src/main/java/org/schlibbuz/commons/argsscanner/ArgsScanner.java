@@ -105,7 +105,7 @@ public class ArgsScanner {
     }
 
     List<String> normalizeArgs(String[] args) {
-        LinkedList<String> argsList = new LinkedList<>(Arrays.asList(args));
+        LinkedList<String> argsList = new LinkedList<>(List.of(args));
 
         if (argsList.isEmpty()) {
             return encapsulateWithDefaults(argsList);
